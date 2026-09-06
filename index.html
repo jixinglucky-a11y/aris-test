@@ -3730,13 +3730,51 @@
 
     .nav-button:active { background: rgba(255,255,255,0.28); }
 
+    /* Keep the My page tabs consistent with Calendar's top segmented control.
+       They are part of the scroll content, so the tabs move away with the page
+       instead of covering the first card while the user scrolls. */
     .me-tabbar {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+      position: static;
+      margin: 0 0 18px;
+      padding: 0;
       background: transparent;
+      border: 0;
+      border-bottom: 1px solid rgba(42,0,86,0.48);
+      border-radius: 0;
+      box-shadow: none;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
     }
 
-    .me-tabbar button { font-size: 15px; }
+    .me-tabbar button {
+      min-height: 48px;
+      position: relative;
+      color: rgba(42,0,86,0.62);
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      font-size: 15px;
+      font-weight: 760;
+    }
+
+    .me-tabbar button.active {
+      color: var(--ink);
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .me-tabbar button.active::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 4px;
+      background: var(--purple);
+    }
 
     .segmented button,
     .me-tabbar button,
