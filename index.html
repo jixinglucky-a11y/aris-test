@@ -231,38 +231,129 @@
       touch-action: pan-y;
     }
 
-    .day-switcher {
+    .topic-switcher {
       display: grid;
-      grid-template-columns: 38px minmax(0, 1fr) 38px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
       align-items: center;
-      gap: 8px;
       margin-bottom: 18px;
+      padding: 11px 12px;
+      background: rgba(255,255,255,0.62);
+      border: 1px solid rgba(255,255,255,0.78);
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(42,0,86,0.05);
+      backdrop-filter: blur(14px) saturate(120%);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
     }
 
-    .day-switcher button {
-      width: 38px;
-      height: 38px;
+    .topic-switcher-copy,
+    .topic-switcher-copy span,
+    .topic-switcher-copy strong { min-width: 0; display: block; }
+
+    .topic-switcher-copy > span:first-child {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .topic-switcher-copy strong {
+      margin-top: 3px;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 19px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .topic-switcher-copy > span:last-child {
+      margin-top: 2px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 15px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .topic-switcher-actions { display: flex; gap: 8px; }
+
+    .topic-switcher button {
+      min-width: 44px;
+      min-height: 44px;
       display: grid;
       place-items: center;
       color: var(--ink);
-      background: transparent;
-      border-radius: 50%;
-      font-size: 20px;
+      background: rgba(255,255,255,0.74);
+      border: 1px solid rgba(42,0,86,0.1);
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 700;
     }
 
-    .day-label { text-align: center; }
-
-    .day-label strong {
-      display: block;
-      font-size: 14px;
-      line-height: 18px;
-    }
-
-    .day-label span {
-      display: block;
-      margin-top: 2px;
-      color: var(--muted);
+    .topic-switcher button.topic-list-button {
+      width: auto;
+      padding: 0 10px;
       font-size: 11px;
+    }
+
+    .conversation-option {
+      min-height: 68px;
+      gap: 10px;
+    }
+
+    .conversation-option.active {
+      border-color: rgba(253, 135, 70, 0.42);
+      background: rgba(253, 135, 70, 0.1);
+    }
+
+    .conversation-option > span {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .conversation-option > span > span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .conversation-option > b {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .conversation-empty {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      padding: 52px 24px 30px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .conversation-empty .avatar {
+      width: 42px;
+      height: 42px;
+      margin-bottom: 4px;
+    }
+
+    .conversation-empty h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 20px;
+      line-height: 26px;
+    }
+
+    .conversation-empty p {
+      max-width: 260px;
+      margin: 0;
+      font-size: 13px;
+      line-height: 20px;
     }
 
     .thread {
@@ -3013,6 +3104,147 @@
 
     .header-action span { font-size: 11px; }
 
+    /* Coach uses a ChatGPT-like conversation drawer instead of an in-page topic bar. */
+    .app.coach-mode .header-action {
+      grid-column: 1;
+      justify-self: start;
+      width: 44px;
+      padding: 0;
+    }
+
+    .app.coach-mode .header-action span { display: none; }
+
+    .conversation-sidebar-layer {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      align-items: stretch;
+      background: rgba(38, 0, 77, 0.26);
+      backdrop-filter: blur(8px) saturate(115%);
+      -webkit-backdrop-filter: blur(8px) saturate(115%);
+    }
+
+    .conversation-sidebar-layer.open { display: flex; }
+
+    .conversation-sidebar-backdrop {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+    }
+
+    .conversation-sidebar {
+      position: relative;
+      width: min(330px, calc(100% - 38px));
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: max(16px, env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom));
+      color: var(--ink);
+      background:
+        linear-gradient(160deg, rgba(255,255,255,0.96), rgba(238,244,247,0.92)),
+        url("assets/aris-aurora-background.png") center top / auto 100% no-repeat;
+      border-right: 1px solid rgba(255,255,255,0.82);
+      box-shadow: 18px 0 48px rgba(38, 0, 77, 0.18);
+      transform: translateX(-100%);
+      animation: conversation-sidebar-in 0.24s cubic-bezier(.22,.8,.24,1) forwards;
+    }
+
+    @keyframes conversation-sidebar-in {
+      to { transform: translateX(0); }
+    }
+
+    .conversation-sidebar-head,
+    .conversation-sidebar-title,
+    .conversation-sidebar-actions {
+      display: flex;
+      align-items: center;
+    }
+
+    .conversation-sidebar-head {
+      justify-content: space-between;
+      gap: 10px;
+      padding: 2px 2px 16px;
+    }
+
+    .conversation-sidebar-title { gap: 9px; min-width: 0; }
+    .conversation-sidebar-title .avatar { flex: 0 0 auto; }
+    .conversation-sidebar-title strong { font-size: 16px; line-height: 21px; }
+    .conversation-sidebar-title span { display: block; margin-top: 1px; color: var(--muted); font-size: 10px; line-height: 14px; }
+
+    .conversation-sidebar-close,
+    .conversation-sidebar-new {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      min-height: 42px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: rgba(255,255,255,0.78);
+      border: 1px solid rgba(255,255,255,0.78);
+      border-radius: 50%;
+    }
+
+    .conversation-sidebar-close { font-size: 22px; line-height: 1; }
+    .conversation-sidebar-new { font-size: 23px; line-height: 1; }
+
+    .conversation-sidebar-label {
+      margin: 4px 4px 8px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .conversation-sidebar-content {
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+
+    .conversation-sidebar-content .conversation-menu { gap: 7px; }
+    .conversation-sidebar-content .conversation-option {
+      min-height: 66px;
+      grid-template-columns: minmax(0,1fr) auto;
+      padding: 11px 10px;
+      background: rgba(255,255,255,0.52);
+      border-color: rgba(255,255,255,0.7);
+      border-radius: 10px;
+    }
+
+    .conversation-sidebar-content .conversation-option.active {
+      background: rgba(215,251,255,0.82);
+      border-color: rgba(49,0,97,0.12);
+      box-shadow: 0 5px 14px rgba(38,0,77,0.07);
+    }
+
+    .conversation-sidebar-content .conversation-option strong { font-size: 13px; line-height: 17px; }
+    .conversation-sidebar-content .conversation-option > span > span { margin-top: 3px; font-size: 10px; line-height: 14px; }
+    .conversation-sidebar-content .conversation-option > b { font-size: 11px; font-weight: 700; white-space: nowrap; }
+
+    .conversation-sidebar-empty {
+      padding: 18px 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.45);
+      border: 1px dashed rgba(42,0,86,0.14);
+      border-radius: 10px;
+      font-size: 11px;
+      line-height: 17px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .conversation-sidebar { animation: none; transform: translateX(0); }
+    }
+
     .coach-context {
       width: calc(100% - 32px);
       min-height: 58px;
@@ -3806,15 +4038,15 @@
   </style>
 </head>
 <body>
-  <main class="app" aria-label="Aris AI 马拉松备赛 App 原型">
+  <main class="app coach-mode" aria-label="Aris AI 马拉松备赛 App 原型">
     <header class="app-header">
       <div class="header-title">
         <h1 id="headerTitle">AI Coach</h1>
         <span id="headerSubtitle">今天 · 与教练保持沟通</span>
       </div>
       <button class="header-action" id="headerAction" aria-label="查看对话历史">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>
-        <span id="headerActionLabel">历史</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        <span id="headerActionLabel">主题</span>
       </button>
     </header>
 
@@ -3831,11 +4063,6 @@
           </div>
         </div>
         <div class="coach-scroll" id="coachScroll">
-          <div class="day-switcher">
-            <button id="previousConversationBtn" aria-label="查看昨天对话">‹</button>
-            <div class="day-label"><strong id="conversationDate">今天 · 9月5日 周六</strong><span id="conversationSummary">4 条沟通 · 1 个待执行建议</span></div>
-            <button id="nextConversationBtn" aria-label="查看下一天对话">›</button>
-          </div>
           <div class="thread" id="chatThread"></div>
         </div>
         <div class="composer-wrap">
@@ -4104,6 +4331,24 @@
       </section>
     </div>
 
+    <div class="conversation-sidebar-layer" id="conversationSidebarLayer" aria-hidden="true">
+      <button class="conversation-sidebar-backdrop" id="conversationSidebarBackdrop" aria-label="关闭对话主题侧边栏"></button>
+      <aside class="conversation-sidebar" role="dialog" aria-modal="true" aria-labelledby="conversationSidebarTitle">
+        <div class="conversation-sidebar-head">
+          <div class="conversation-sidebar-title">
+            <span class="avatar">AI</span>
+            <div><strong id="conversationSidebarTitle">对话主题</strong><span>按沟通内容整理你的训练决策</span></div>
+          </div>
+          <div class="conversation-sidebar-actions">
+            <button class="conversation-sidebar-new" id="conversationSidebarNewBtn" aria-label="新建对话主题">+</button>
+            <button class="conversation-sidebar-close" id="conversationSidebarCloseBtn" aria-label="关闭对话主题侧边栏">×</button>
+          </div>
+        </div>
+        <div class="conversation-sidebar-label">最近沟通</div>
+        <div class="conversation-sidebar-content" id="conversationSidebarContent"></div>
+      </aside>
+    </div>
+
     <nav class="bottom-nav" aria-label="主导航">
       <button class="nav-button active" data-tab="coach" aria-current="page">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 9h8M8 13h5"/></svg>
@@ -4179,7 +4424,8 @@
       tab: "coach",
       meTab: "data",
       dataRange: "week",
-      conversationDay: 0,
+      activeConversationId: "daily-checkin",
+      conversations: [],
       calendarMode: "week",
       weekOffset: 0,
       selectedDay: 5,
@@ -4401,6 +4647,33 @@
       ]
     };
 
+    const conversationSeedData = [
+      {
+        id: "daily-checkin",
+        topicKey: "daily",
+        title: "今日训练与身体状态",
+        preview: "晨间状态、今日训练与左膝反馈",
+        updatedLabel: "刚刚",
+        messages: state.messages
+      },
+      {
+        id: "tempo-analysis",
+        topicKey: "analysis",
+        title: "Tempo 训练分析",
+        preview: "后两公里有点吃力，查看训练影响",
+        updatedLabel: "昨天",
+        messages: archivedConversations["-1"]
+      },
+      {
+        id: "weekly-plan",
+        topicKey: "plan",
+        title: "本周训练计划",
+        preview: "Base 第 6 周安排与训练约束",
+        updatedLabel: "3 天前",
+        messages: archivedConversations["-2"]
+      }
+    ];
+
     const bodyImages = {
       front: "assets/body-status-full-3d-v2.png",
       back: "assets/body-status-full-3d-back-v2.png"
@@ -4412,7 +4685,7 @@
     });
 
     const tabMeta = {
-      coach: ["AI Coach", "今天 · 与教练保持沟通", "历史"],
+      coach: ["AI Coach", "今天 · 与教练保持沟通", "主题"],
       calendar: ["运动日历", "训练安排、比赛日程与执行", "添加"],
       me: ["我的", "数据、身体状态与成绩预测", "设置"]
     };
@@ -4425,18 +4698,206 @@
 
     const chatThread = document.getElementById("chatThread");
     const coachScroll = document.getElementById("coachScroll");
+    const app = document.querySelector(".app");
     const sheetLayer = document.getElementById("sheetLayer");
     const sheetContent = document.getElementById("sheetContent");
+    const conversationSidebarLayer = document.getElementById("conversationSidebarLayer");
+    const conversationSidebarContent = document.getElementById("conversationSidebarContent");
     const toast = document.getElementById("toast");
     const STORAGE_KEY = "aris-marathon-prototype-v5";
+
+    function cloneConversationMessages(messages) {
+      return JSON.parse(JSON.stringify(Array.isArray(messages) ? messages : []));
+    }
+
+    function initializeConversationState(legacyMessages) {
+      state.conversations = conversationSeedData.map(conversation => ({
+        ...conversation,
+        messages: cloneConversationMessages(conversation.id === "daily-checkin" ? legacyMessages : conversation.messages)
+      }));
+      state.activeConversationId = "daily-checkin";
+      state.messages = state.conversations[0].messages;
+    }
+
+    function activeConversation() {
+      return state.conversations.find(conversation => conversation.id === state.activeConversationId) || state.conversations[0];
+    }
+
+    function conversationMessageCount(messages) {
+      return (messages || []).filter(message => message.type === "user" || message.type === "coach").length;
+    }
+
+    function conversationPreview(messages) {
+      const latest = [...(messages || [])].reverse().find(message => message.type === "user" || message.type === "coach");
+      return latest?.text || "输入你的问题，开始一次新的教练沟通";
+    }
+
+    function syncActiveConversation() {
+      const current = activeConversation();
+      if (!current) return;
+      current.messages = state.messages;
+      current.preview = conversationPreview(state.messages);
+    }
+
+    function renderConversationContext() {
+      const current = activeConversation();
+      if (!current) return;
+      const count = conversationMessageCount(state.messages);
+      const title = document.getElementById("conversationTitle");
+      const summary = document.getElementById("conversationSummary");
+      if (title) title.textContent = current.title;
+      if (summary) summary.textContent = `${count} 条沟通${state.pendingAdjustment && current.topicKey === "plan" && !state.planAdjusted ? " · 1 个待执行建议" : ""}`;
+      if (state.tab === "coach" && !conversationSidebarLayer.classList.contains("open")) {
+        document.getElementById("headerSubtitle").textContent = "与你的训练教练持续沟通";
+      }
+      renderConversationSidebar();
+    }
+
+    function renderConversationSidebar() {
+      if (!conversationSidebarContent) return;
+      if (!state.conversations.length) {
+        conversationSidebarContent.innerHTML = '<div class="conversation-sidebar-empty">还没有对话主题。点击右上角 +，开始一次新的教练沟通。</div>';
+        return;
+      }
+      conversationSidebarContent.innerHTML = `<div class="sheet-menu conversation-menu">${state.conversations.map(conversation => {
+        const active = conversation.id === state.activeConversationId ? " active" : "";
+        const count = conversationMessageCount(conversation.messages);
+        return `<button class="menu-option conversation-option${active}" data-sidebar-action="open-conversation" data-conversation-id="${escapeHtml(conversation.id)}"><span><strong>${escapeHtml(conversation.title)}</strong><span>${escapeHtml(conversation.preview)} · ${count} 条沟通</span></span><b>${escapeHtml(conversation.updatedLabel || "")} ›</b></button>`;
+      }).join("")}</div>`;
+    }
+
+    function openConversationSidebar() {
+      syncActiveConversation();
+      renderConversationSidebar();
+      conversationSidebarLayer.classList.add("open");
+      conversationSidebarLayer.setAttribute("aria-hidden", "false");
+      setTimeout(() => document.getElementById("conversationSidebarCloseBtn")?.focus(), 10);
+    }
+
+    function closeConversationSidebar() {
+      conversationSidebarLayer.classList.remove("open");
+      conversationSidebarLayer.setAttribute("aria-hidden", "true");
+      document.getElementById("headerAction")?.focus();
+    }
+
+    function conversationTopicForText(text) {
+      const value = String(text || "");
+      if (value.includes("膝") || value.includes("疼") || value.includes("痛") || value.includes("伤") || value.includes("身体")) {
+        return { key: "body", title: "身体状态与伤病" };
+      }
+      if (value.includes("成绩") || value.includes("目标") || value.toLowerCase().includes("race")) {
+        return { key: "prediction", title: "目标成绩预测" };
+      }
+      if (value.includes("周日") || value.includes("没时间") || value.includes("调整") || value.includes("计划") || value.includes("安排")) {
+        return { key: "plan", title: "训练计划调整" };
+      }
+      if (value.includes("今天") || value.includes("现在") || value.includes("晨起") || value.includes("恢复") || value.includes("能不能跑") || value.includes("适合跑")) {
+        return { key: "daily", title: "今日训练与身体状态" };
+      }
+      if (value.includes("训练") || value.includes("跑") || value.includes("配速") || value.includes("心率") || value.includes("分析")) {
+        return { key: "analysis", title: "训练表现分析" };
+      }
+      return { key: `custom-${Date.now()}`, title: `关于“${String(value).slice(0, 16)}${String(value).length > 16 ? "…" : ""}”` };
+    }
+
+    function startConversationForInquiry(text, topicKey = null) {
+      const topic = topicKey === "daily"
+        ? { key: "daily", title: "今日训练与身体状态" }
+        : topicKey === "analysis"
+          ? { key: "analysis", title: "训练表现分析" }
+          : topicKey === "plan"
+            ? { key: "plan", title: "训练计划调整" }
+            : topicKey === "body"
+              ? { key: "body", title: "身体状态与伤病" }
+              : topicKey === "prediction"
+                ? { key: "prediction", title: "目标成绩预测" }
+                : conversationTopicForText(text);
+      const current = activeConversation();
+      const currentIsBlank = current && conversationMessageCount(current.messages) === 0;
+      const currentIsPlaceholder = currentIsBlank && current.title === "新对话主题";
+      let target = currentIsPlaceholder
+        ? current
+        : current && current.topicKey === topic.key
+          ? current
+          : state.conversations.find(conversation => conversation.topicKey === topic.key);
+      if (!target) {
+        target = {
+          id: `conversation-${Date.now()}`,
+          topicKey: topic.key,
+          title: topic.title,
+          preview: text,
+          updatedLabel: "刚刚",
+          messages: []
+        };
+        state.conversations.unshift(target);
+      }
+      if (currentIsPlaceholder && target === current) {
+        target.topicKey = topic.key;
+        target.title = topic.title;
+        target.preview = text;
+      }
+      if (target.id !== state.activeConversationId) {
+        syncActiveConversation();
+        state.activeConversationId = target.id;
+        state.messages = target.messages || [];
+      }
+      target.updatedLabel = "刚刚";
+      state.conversations = [target, ...state.conversations.filter(conversation => conversation.id !== target.id)];
+      renderConversationContext();
+      renderMessages(false);
+      return target;
+    }
+
+    function activateConversation(id) {
+      const target = state.conversations.find(conversation => conversation.id === id);
+      if (!target) return;
+      syncActiveConversation();
+      state.activeConversationId = target.id;
+      state.messages = target.messages || [];
+      renderConversationContext();
+      renderMessages(false);
+      coachScroll.scrollTop = 0;
+      persistState();
+    }
+
+    function startNewConversation() {
+      syncActiveConversation();
+      const target = {
+        id: `conversation-${Date.now()}`,
+        topicKey: `custom-${Date.now()}`,
+        title: "新对话主题",
+        preview: "输入你的问题，开始一次新的教练沟通",
+        updatedLabel: "刚刚",
+        messages: []
+      };
+      state.conversations.unshift(target);
+      state.activeConversationId = target.id;
+      state.messages = target.messages;
+      renderConversationContext();
+      renderMessages(false);
+      coachScroll.scrollTop = 0;
+      persistState();
+    }
 
     function hydrateState() {
       try {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        if (!saved) return;
-        ["meTab", "dataRange", "calendarMode", "weekOffset", "selectedDay", "planAdjusted", "pendingAdjustment", "pain", "fatigue", "readiness", "probability", "predictionMinutes", "activeBodyPart", "bodySide", "planVersion", "injuryPlanPaused", "injuryPausedBackup", "lastInjuryAssessment", "conservativePlanApplied", "unavailable", "extraRaces", "primaryRace", "planSettings", "healthDuration", "healthLevel", "returnSpeed", "pausedWorkoutId", "activeWorkoutId", "activeStep", "activities", "workouts", "messages", "bodyRecords"].forEach(key => {
+        if (!saved) {
+          initializeConversationState(state.messages);
+          return;
+        }
+        ["meTab", "dataRange", "calendarMode", "weekOffset", "selectedDay", "planAdjusted", "pendingAdjustment", "pain", "fatigue", "readiness", "probability", "predictionMinutes", "activeBodyPart", "bodySide", "planVersion", "injuryPlanPaused", "injuryPausedBackup", "lastInjuryAssessment", "conservativePlanApplied", "unavailable", "extraRaces", "primaryRace", "planSettings", "healthDuration", "healthLevel", "returnSpeed", "pausedWorkoutId", "activeWorkoutId", "activeStep", "activities", "workouts", "messages", "bodyRecords", "activeConversationId", "conversations"].forEach(key => {
           if (saved[key] !== undefined) state[key] = saved[key];
         });
+        if (Array.isArray(saved.conversations) && saved.conversations.length) {
+          state.conversations = saved.conversations;
+          state.activeConversationId = saved.activeConversationId || state.conversations[0].id;
+          const activeConversation = state.conversations.find(item => item.id === state.activeConversationId) || state.conversations[0];
+          state.activeConversationId = activeConversation.id;
+          state.messages = Array.isArray(activeConversation.messages) ? activeConversation.messages : state.messages;
+        } else {
+          initializeConversationState(state.messages);
+        }
         state.bodyRecords.forEach(record => {
           const body = bodyData[record.region];
           if (!body) return;
@@ -4461,7 +4922,8 @@
     function persistState() {
       try {
         const snapshot = {};
-        ["meTab", "dataRange", "calendarMode", "weekOffset", "selectedDay", "planAdjusted", "pendingAdjustment", "pain", "fatigue", "readiness", "probability", "predictionMinutes", "activeBodyPart", "bodySide", "planVersion", "injuryPlanPaused", "injuryPausedBackup", "lastInjuryAssessment", "conservativePlanApplied", "unavailable", "extraRaces", "primaryRace", "planSettings", "healthDuration", "healthLevel", "returnSpeed", "pausedWorkoutId", "activeWorkoutId", "activeStep", "activities", "workouts", "messages", "bodyRecords"].forEach(key => { snapshot[key] = state[key]; });
+        syncActiveConversation();
+        ["meTab", "dataRange", "calendarMode", "weekOffset", "selectedDay", "planAdjusted", "pendingAdjustment", "pain", "fatigue", "readiness", "probability", "predictionMinutes", "activeBodyPart", "bodySide", "planVersion", "injuryPlanPaused", "injuryPausedBackup", "lastInjuryAssessment", "conservativePlanApplied", "unavailable", "extraRaces", "primaryRace", "planSettings", "healthDuration", "healthLevel", "returnSpeed", "pausedWorkoutId", "activeWorkoutId", "activeStep", "activities", "workouts", "messages", "bodyRecords", "activeConversationId", "conversations"].forEach(key => { snapshot[key] = state[key]; });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
       } catch (error) {
         console.warn("Unable to persist prototype state", error);
@@ -4592,7 +5054,7 @@
     }
 
     function iconForHeader(tab) {
-      if (tab === "coach") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>';
+      if (tab === "coach") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
       if (tab === "calendar") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
       return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg>';
     }
@@ -4638,6 +5100,7 @@
     function setTab(tab, target) {
       const changed = state.tab !== tab;
       state.tab = tab;
+      app.classList.toggle("coach-mode", tab === "coach");
       Object.entries(views).forEach(([key, view]) => {
         const active = key === tab;
         if (active && changed) view.classList.add("view-enter");
@@ -4663,7 +5126,7 @@
       });
       document.getElementById("headerTitle").textContent = tabMeta[tab][0];
       document.getElementById("headerSubtitle").textContent = tabMeta[tab][1];
-      if (tab === "coach" && state.conversationDay !== 0) document.getElementById("headerSubtitle").textContent = `${document.getElementById("conversationDate").textContent} · 历史沟通`;
+      if (tab === "coach") renderConversationContext();
       document.getElementById("headerActionLabel").textContent = tabMeta[tab][2];
       const action = document.getElementById("headerAction");
       action.innerHTML = `${iconForHeader(tab)}<span id="headerActionLabel">${tabMeta[tab][2]}</span>`;
@@ -4760,13 +5223,13 @@
     }
 
     function messageHtml(message) {
-      if (message.type === "divider") return `<div class="time-divider">${message.text}</div>`;
+      if (message.type === "divider") return `<div class="time-divider">${escapeHtml(message.text)}</div>`;
       if (message.type === "card") return cardHtml(message.kind, message);
       if (message.type === "typing") return '<div class="message-row"><span class="avatar">AI</span><div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div></div>';
       const isUser = message.type === "user";
       return `<div class="message-row ${isUser ? "user" : ""}">
         ${isUser ? "" : '<span class="avatar">AI</span>'}
-        <div class="bubble">${message.text}<span class="message-time">${message.time || "刚刚"}</span></div>
+        <div class="bubble">${escapeHtml(message.text)}<span class="message-time">${escapeHtml(message.time || "刚刚")}</span></div>
         ${isUser ? '<span class="avatar">我</span>' : ""}
       </div>`;
     }
@@ -4817,40 +5280,63 @@
     }
 
     function renderMessages(scroll = false) {
-      chatThread.innerHTML = state.messages.map(messageHtml).join("");
-      document.getElementById("conversationSummary").textContent = `${state.messages.filter(m => m.type !== "divider").length} 条沟通${state.conversationDay === 0 && state.pendingAdjustment && !state.planAdjusted ? " · 1 个待执行建议" : ""}`;
+      const messages = Array.isArray(state.messages) ? state.messages : [];
+      chatThread.innerHTML = messages.length
+        ? messages.map(messageHtml).join("")
+        : '<div class="conversation-empty"><span class="avatar">AI</span><h2>和教练开始一个新主题</h2><p>告诉我今天的训练、身体感受或比赛目标，我会把后续沟通整理在这个主题里。</p></div>';
+      renderConversationContext();
+      syncActiveConversation();
       if (scroll) setTimeout(() => { coachScroll.scrollTop = coachScroll.scrollHeight; }, 20);
     }
 
     function appendMessage(type, text, card) {
       state.messages.push({ type, text, time: "刚刚" });
       if (card) state.messages.push({ type: "card", kind: card });
+      const current = activeConversation();
+      if (current) current.updatedLabel = "刚刚";
       renderMessages(true);
       persistState();
     }
 
     function coachReply(userText, coachText, card) {
+      const conversation = activeConversation();
+      const messages = state.messages;
       appendMessage("user", userText);
-      state.messages.push({ type: "typing" });
+      const typingMessage = { type: "typing" };
+      messages.push(typingMessage);
       renderMessages(true);
       setTimeout(() => {
-        state.messages = state.messages.filter(message => message.type !== "typing");
-        state.messages.push({ type: "coach", text: coachText, time: "刚刚" });
-        if (card) state.messages.push({ type: "card", kind: card });
-        renderMessages(true);
+        const typingIndex = messages.indexOf(typingMessage);
+        if (typingIndex >= 0) messages.splice(typingIndex, 1);
+        messages.push({ type: "coach", text: coachText, time: "刚刚" });
+        if (card) messages.push({ type: "card", kind: card });
+        conversation.messages = messages;
+        conversation.preview = conversationPreview(messages);
+        conversation.updatedLabel = "刚刚";
+        if (state.activeConversationId === conversation.id) {
+          state.messages = messages;
+          renderMessages(true);
+        }
         persistState();
       }, 520);
     }
 
     function handlePrompt(key) {
-      if (state.conversationDay !== 0) switchConversation(0);
-      if (key === "today") coachReply("今天适合跑吗？", "适合。恢复分 74，静息心率正常。保留 Easy Run，但全程控制在 Z2。", "today");
+      if (key === "today") {
+        startConversationForInquiry("今天适合跑吗？", "daily");
+        coachReply("今天适合跑吗？", "适合。恢复分 74，静息心率正常。保留 Easy Run，但全程控制在 Z2。", "today");
+      }
       if (key === "busy") {
+        startConversationForInquiry("周日没时间，长距离怎么办？", "plan");
         state.pendingAdjustment = true;
         coachReply("周日没时间，长距离怎么办？", "我结合行程和周日高温，建议取消今天的 Easy，把 Long Run 前移到周六。", "adjust");
       }
-      if (key === "pain") coachReply("左膝有点疼。", "先记录疼痛等级和疲劳感，我会判断今天训练和周末长距离是否需要调整。", null);
+      if (key === "pain") {
+        startConversationForInquiry("左膝有点疼。", "body");
+        coachReply("左膝有点疼。", "先记录疼痛等级和疲劳感，我会判断今天训练和周末长距离是否需要调整。", null);
+      }
       if (key === "race") {
+        startConversationForInquiry("我现在达成目标赛事成绩的机会怎么样？", "prediction");
         const race = primaryRace();
         coachReply(`我现在达成${race.name}目标 ${race.goal} 的机会怎么样？`, `当前预测 ${formatTime(state.predictionMinutes)}，达成目标 ${race.goal} 的概率是 ${state.probability}%。`, "race");
       }
@@ -4860,9 +5346,12 @@
       const input = document.getElementById("coachInput");
       const text = input.value.trim();
       if (!text) return;
-      if (state.conversationDay !== 0) switchConversation(0);
       input.value = "";
       const lower = text.toLowerCase();
+      const topic = conversationTopicForText(text);
+      const current = activeConversation();
+      const shouldRoute = !current || conversationMessageCount(current.messages) === 0 || (!topic.key.startsWith("custom-") && current.topicKey !== topic.key);
+      if (shouldRoute) startConversationForInquiry(text);
       if (text.includes("周日") || text.includes("没时间") || text.includes("调整")) {
         state.pendingAdjustment = true;
         coachReply(text, "我建议取消周六 Easy，把长距离前移到周六。调整前后如下。", "adjust");
@@ -5295,6 +5784,7 @@
       const workout = activeWorkouts().find(item => item.id === id) || state.workouts.find(item => item.id === id);
       closeSheet();
       setTab("coach");
+      startConversationForInquiry(`我想确认${workout.day}的${workout.title}是否需要调整。`, "plan");
       coachReply(`我想确认${workout.day}的${workout.title}是否需要调整。`, `结合当前恢复和疼痛状态，${workout.title}可以执行。若${feedbackBodyPart().label}疼痛超过 3/10，请立即停止并降量。`, null);
     }
 
@@ -5604,10 +6094,10 @@
       state.unavailable = [{ index, time, reason }, ...state.unavailable.filter(item => item.index !== index)];
       workout.risk = true;
       state.pendingAdjustment = true;
-      state.todayMessages = state.messages;
       persistState();
       closeSheet();
       setTab("coach");
+      startConversationForInquiry(`${workout.day}${time}不能训练，原因是${reason}。`, "plan");
       coachReply(`${workout.day}${time}不能训练，原因是${reason}。`, `${workout.title}与新安排冲突。我已生成一份调整建议，正式计划尚未改变。`, "adjust");
       renderCalendar();
     }
@@ -6026,26 +6516,6 @@
       `);
     }
 
-    function switchConversation(day) {
-      const bounded = Math.max(-2, Math.min(0, day));
-      if (state.conversationDay === 0) state.todayMessages = state.messages;
-      state.conversationDay = bounded;
-      state.messages = bounded === 0 ? (state.todayMessages || state.messages) : archivedConversations[String(bounded)];
-      const labels = {
-        "0": "今天 · 9月5日 周六",
-        "-1": "昨天 · 9月4日 周五",
-        "-2": "周四 · 9月3日"
-      };
-      document.getElementById("conversationDate").textContent = labels[String(bounded)];
-      document.getElementById("headerSubtitle").textContent = bounded === 0 ? "今天 · 与教练保持沟通" : `${labels[String(bounded)]} · 历史沟通`;
-      document.getElementById("previousConversationBtn").disabled = bounded === -2;
-      document.getElementById("nextConversationBtn").disabled = bounded === 0;
-      document.getElementById("previousConversationBtn").setAttribute("aria-label", bounded === -1 ? "查看周一对话" : "查看更早对话");
-      document.getElementById("nextConversationBtn").setAttribute("aria-label", bounded === -1 ? "回到今天对话" : "查看下一天对话");
-      renderMessages(false);
-      coachScroll.scrollTop = 0;
-    }
-
     function openPerformanceSheet(distance) {
       const performance = {
         "5k": { title: "5 km 当前能力", value: "23:18", pace: "4'40/km", basis: "最近 6 x 800 m 与阈值跑", confidence: "中等" },
@@ -6071,7 +6541,8 @@
 
     function openHeaderSheet() {
       if (state.tab === "coach") {
-        openSheet("对话历史", "按日期回看教练沟通和重要决策", '<div class="sheet-menu"><button class="menu-option" data-sheet-action="conversation-today"><span><strong>今天 · 9月5日</strong><span>晨间状态、今日训练、计划建议</span></span><b>›</b></button><button class="menu-option" data-sheet-action="conversation-yesterday"><span><strong>昨天 · 9月4日</strong><span>恢复状态与周末计划</span></span><b>›</b></button><button class="menu-option" data-sheet-action="conversation-monday"><span><strong>周四 · 9月3日</strong><span>间歇训练分析</span></span><b>›</b></button></div>');
+        openConversationSidebar();
+        return;
       }
       if (state.tab === "calendar") {
         openRaceExplorer();
@@ -6308,6 +6779,20 @@
       persistState();
     }));
     document.getElementById("headerAction").addEventListener("click", openHeaderSheet);
+    document.getElementById("conversationSidebarCloseBtn").addEventListener("click", closeConversationSidebar);
+    document.getElementById("conversationSidebarBackdrop").addEventListener("click", closeConversationSidebar);
+    document.getElementById("conversationSidebarNewBtn").addEventListener("click", () => {
+      closeConversationSidebar();
+      startNewConversation();
+    });
+    conversationSidebarContent.addEventListener("click", event => {
+      const button = event.target.closest("[data-sidebar-action]");
+      if (!button) return;
+      if (button.dataset.sidebarAction === "open-conversation") {
+        activateConversation(button.dataset.conversationId);
+        closeConversationSidebar();
+      }
+    });
     document.getElementById("raceExplorerBack").addEventListener("click", backRaceExplorer);
     document.getElementById("raceSearchToggle").addEventListener("click", () => document.getElementById("raceSearchInput").focus());
     document.getElementById("raceSearchInput").addEventListener("input", renderRaceCatalog);
@@ -6361,13 +6846,6 @@
       if (action === "view-prediction") setTab("me", "#predictionSection");
       if (action === "view-activity") { setTab("me", "#activitySection"); setTimeout(() => openActivitySheet("a-tempo"), 260); }
       if (action === "get-help") openProfessionalHelpSheet();
-    });
-
-    document.getElementById("previousConversationBtn").addEventListener("click", () => {
-      switchConversation(state.conversationDay - 1);
-    });
-    document.getElementById("nextConversationBtn").addEventListener("click", () => {
-      switchConversation(state.conversationDay + 1);
     });
 
     document.querySelectorAll("[data-calendar-mode]").forEach(button => button.addEventListener("click", () => {
@@ -6520,12 +6998,11 @@
       if (action === "apply-health-plan") applyHealthPlan();
       if (action === "plan-history") openPlanHistorySheet();
       if (action === "open-activity") openActivitySheet(button.dataset.activityId);
-      if (action === "ask-activity") { const activity = state.activities.find(item => item.id === button.dataset.activityId); closeSheet(); setTab("coach"); coachReply(`分析一下${activity.title}。`, `${activity.compare}。RPE ${activity.rpe}/10，疼痛 ${activity.pain}/10；这次训练对当前计划没有负面影响。`, "analysis"); }
+      if (action === "ask-activity") { const activity = state.activities.find(item => item.id === button.dataset.activityId); closeSheet(); setTab("coach"); startConversationForInquiry(`分析一下${activity.title}。`, "analysis"); coachReply(`分析一下${activity.title}。`, `${activity.compare}。RPE ${activity.rpe}/10，疼痛 ${activity.pain}/10；这次训练对当前计划没有负面影响。`, "analysis"); }
       if (action === "ask-prediction") { closeSheet(); setTab("coach"); handlePrompt("race"); }
       if (action === "open-evidence-activity") openActivitySheet("a-tempo");
-      if (action === "conversation-today") { closeSheet(); switchConversation(0); }
-      if (action === "conversation-yesterday") { closeSheet(); switchConversation(-1); }
-      if (action === "conversation-monday") { closeSheet(); switchConversation(-2); }
+      if (action === "open-conversation") { closeSheet(); activateConversation(button.dataset.conversationId); }
+      if (action === "new-conversation") { closeSheet(); startNewConversation(); }
       if (action === "profile-info") openProfileInfoSheet();
       if (action === "heart-zones") openHeartZonesSheet();
       if (action === "data-source") openDataSourcesSheet();
@@ -6597,6 +7074,7 @@
     document.addEventListener("keydown", event => {
       if (event.key !== "Escape") return;
       if (document.getElementById("raceExplorer").classList.contains("open")) backRaceExplorer();
+      else if (conversationSidebarLayer.classList.contains("open")) closeConversationSidebar();
       else closeSheet();
     });
 
